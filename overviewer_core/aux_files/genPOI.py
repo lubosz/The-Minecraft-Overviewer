@@ -327,6 +327,7 @@ def handlePlayers(worldpath, filters, markers):
         playerdir = os.path.join(worldpath, "players")
         useUUIDs = False
 
+    # TODO: This check does not work for end and nether. Single player is always detected.
     if os.path.isdir(playerdir):
         playerfiles = os.listdir(playerdir)
         playerfiles = [x for x in playerfiles if x.endswith(".dat")]
@@ -348,15 +349,17 @@ def handlePlayers(worldpath, filters, markers):
         playername = playerfile.split(".")[0]
         if isSinglePlayer:
             playername = 'Player'
-        data._name = playername
+        if hasattr(data, "_name"):
+          data._name = playername
         if useUUIDs:
             data['uuid'] = playername
 
         # Position at last logout
         data['id'] = "Player"
-        data['x'] = int(data['Pos'][0])
-        data['y'] = int(data['Pos'][1])
-        data['z'] = int(data['Pos'][2])
+        if 'Pos' in data:
+          data['x'] = int(data['Pos'][0])
+          data['y'] = int(data['Pos'][1])
+          data['z'] = int(data['Pos'][2])
         # Time at last logout, calculated from last time the player's file was modified
         data['time'] = time.localtime(os.path.getmtime(os.path.join(playerdir, playerfile)))
 
